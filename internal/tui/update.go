@@ -426,9 +426,3 @@ func floatVal(s string) float64 {
 	return v
 }
 
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
