@@ -3,19 +3,19 @@ package tui
 import "github.com/charmbracelet/bubbles/key"
 
 type keyMap struct {
-	Tab       key.Binding
-	ShiftTab  key.Binding
-	Enter     key.Binding
-	Stop      key.Binding
-	Save      key.Binding
-	Load      key.Binding
-	Delete    key.Binding
-	Up        key.Binding
-	Down      key.Binding
-	Left      key.Binding
-	Right     key.Binding
-	Quit      key.Binding
-	Help      key.Binding
+	Tab      key.Binding
+	ShiftTab key.Binding
+	Enter    key.Binding
+	Stop     key.Binding
+	Save     key.Binding
+	Load     key.Binding
+	Delete   key.Binding
+	Up       key.Binding
+	Down     key.Binding
+	Left     key.Binding
+	Right    key.Binding
+	Quit     key.Binding
+	Help     key.Binding
 }
 
 var keys = keyMap{
@@ -64,8 +64,8 @@ var keys = keyMap{
 		key.WithHelp("→/l", "right"),
 	),
 	Quit: key.NewBinding(
-		key.WithKeys("ctrl+c", "q"),
-		key.WithHelp("q/ctrl+c", "quit"),
+		key.WithKeys("ctrl+c", "ctrl+q"),
+		key.WithHelp("ctrl+q/ctrl+c", "quit"),
 	),
 	Help: key.NewBinding(
 		key.WithKeys("?"),

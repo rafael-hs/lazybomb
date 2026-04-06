@@ -215,6 +215,7 @@ func (m Model) startTest() (Model, tea.Cmd) {
 	if err != nil {
 		m.running = false
 		m.err = err.Error()
+		return m, nil
 	}
 
 	m.activePanel = panelMetrics
@@ -223,9 +224,6 @@ func (m Model) startTest() (Model, tea.Cmd) {
 
 func (m Model) buildConfig() (runner.Config, error) {
 	url := strings.TrimSpace(m.inputs[fieldURL].Value())
-	if url == "" {
-		return runner.Config{}, fmt.Errorf("URL is required")
-	}
 
 	requests, _ := strconv.Atoi(m.inputs[fieldRequests].Value())
 	if requests <= 0 {
@@ -277,13 +275,14 @@ func (m Model) buildConfig() (runner.Config, error) {
 }
 
 func (m Model) saveProfile() (Model, tea.Cmd) {
-	name := strings.TrimSpace(m.inputs[fieldURL].Value())
+	name := strings.TrimSpace(m.inputs[fieldName].Value())
 	if name == "" {
-		m.err = "cannot save: URL is empty"
+		m.err = "cannot save: name is required"
 		return m, nil
 	}
 	p := profile.Profile{
 		Name:         name,
+		Description:  strings.TrimSpace(m.inputs[fieldDescription].Value()),
 		URL:          m.inputs[fieldURL].Value(),
 		Method:       m.inputs[fieldMethod].Value(),
 		Body:         m.inputs[fieldBody].Value(),
@@ -329,6 +328,8 @@ func (m Model) deleteProfile() (Model, tea.Cmd) {
 }
 
 func (m Model) loadProfile(p profile.Profile) Model {
+	m.inputs[fieldName].SetValue(p.Name)
+	m.inputs[fieldDescription].SetValue(p.Description)
 	m.inputs[fieldURL].SetValue(p.URL)
 	m.inputs[fieldMethod].SetValue(p.Method)
 	m.inputs[fieldBody].SetValue(p.Body)
@@ -425,4 +426,3 @@ func floatVal(s string) float64 {
 	v, _ := strconv.ParseFloat(s, 64)
 	return v
 }
-

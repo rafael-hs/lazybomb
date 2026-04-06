@@ -18,10 +18,13 @@ func Run() error {
 
 	slog.Info("starting lazybomb")
 
-	m := tui.InitialModel()
+	m, err := tui.InitialModel()
+	if err != nil {
+		return err
+	}
 	p := tea.NewProgram(m, tea.WithAltScreen(), tea.WithMouseCellMotion())
 	tui.SetProgram(p)
-	_, err := p.Run()
+	_, err = p.Run()
 	return err
 }
 

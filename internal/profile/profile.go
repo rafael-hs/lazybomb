@@ -10,6 +10,7 @@ import (
 // Profile stores a named request configuration.
 type Profile struct {
 	Name        string            `json:"name"`
+	Description string            `json:"description,omitempty"`
 	URL         string            `json:"url"`
 	Method      string            `json:"method"`
 	Headers     map[string]string `json:"headers,omitempty"`

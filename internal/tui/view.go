@@ -2,6 +2,7 @@ package tui
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
@@ -47,6 +48,7 @@ var (
 	styleValue = lipgloss.NewStyle().
 			Foreground(colorFg)
 
+	styleAccent  = lipgloss.NewStyle().Foreground(colorAccent)
 	styleSuccess = lipgloss.NewStyle().Foreground(colorSuccess).Bold(true)
 	styleWarn    = lipgloss.NewStyle().Foreground(colorWarn).Bold(true)
 	styleError   = lipgloss.NewStyle().Foreground(colorError).Bold(true)
@@ -136,6 +138,8 @@ func (m Model) configView(availH int) string {
 		label string
 		field configField
 	}{
+		{"Name", fieldName},
+		{"Description", fieldDescription},
 		{"URL", fieldURL},
 		{"Method", fieldMethod},
 		{"Headers", fieldHeaders},
@@ -277,10 +281,17 @@ func (m Model) metricsSummary(snap runner.Snapshot, w, h int) string {
 		"",
 	}
 
-	// Status codes breakdown
+	// Status codes breakdown (sorted for deterministic rendering)
 	if len(snap.StatusCodes) > 0 {
+		codes := make([]int, 0, len(snap.StatusCodes))
+		for code := range snap.StatusCodes {
+			codes = append(codes, code)
+		}
+		sort.Ints(codes)
+
 		lines = append(lines, styleLabel.Render("Status codes"))
-		for code, count := range snap.StatusCodes {
+		for _, code := range codes {
+			count := snap.StatusCodes[code]
 			style := styleSuccess
 			if code >= 400 && code < 500 {
 				style = styleWarn
@@ -333,7 +344,7 @@ func (m Model) histogramView(snap runner.Snapshot, w, h int) string {
 			barW = 1
 		}
 
-		bar := styleAccent().Render(strings.Repeat("█", barW))
+		bar := styleAccent.Render(strings.Repeat("█", barW))
 		label := lipgloss.NewStyle().Width(8).Render(b.Label)
 		count := styleMuted.Render(fmt.Sprintf(" %d", b.Count))
 		rows = append(rows, label+bar+count)
@@ -342,10 +353,6 @@ func (m Model) histogramView(snap runner.Snapshot, w, h int) string {
 	return lipgloss.NewStyle().Width(w).Render(
 		lipgloss.JoinVertical(lipgloss.Left, rows...),
 	)
-}
-
-func styleAccent() lipgloss.Style {
-	return lipgloss.NewStyle().Foreground(colorAccent)
 }
 
 // ── Profiles panel ────────────────────────────────────────────────────────────
@@ -363,8 +370,12 @@ func (m Model) profilesView(availH int) string {
 		rows = append(rows, styleMuted.Render("Press ctrl+s in Config to save the current settings."))
 	} else {
 		for i, p := range m.profiles {
-			line := fmt.Sprintf("%-30s  %s  n=%d c=%d",
-				truncate(p.Name, 30), p.Method, p.Requests, p.Concurrency)
+			desc := ""
+			if p.Description != "" {
+				desc = "  " + truncate(p.Description, 35)
+			}
+			line := fmt.Sprintf("%-30s  %s  n=%d c=%d%s",
+				truncate(p.Name, 30), p.Method, p.Requests, p.Concurrency, desc)
 			if i == m.profileCursor {
 				line = styleTabActive.Render("> " + line)
 			} else {
@@ -488,7 +499,7 @@ func sparkline(vals []float64, width int) string {
 		}
 		sb.WriteRune(runes[idx])
 	}
-	return styleAccent().Render(sb.String())
+	return styleAccent.Render(sb.String())
 }
 
 func truncate(s string, n int) string {
